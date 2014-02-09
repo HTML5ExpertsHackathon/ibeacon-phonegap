@@ -35,14 +35,12 @@
 
 - (void)locationManager:(CLLocationManager *)manager didStartMonitoringForRegion:(CLRegion *)region
 {
-    NSLog(@"start monitoring");
     [self.locationManager requestStateForRegion:self.beaconRegion];
     [self sendLocalNotificationForMessage:@"Start Monitoring Region"];
 }
 
 - (void)locationManager:(CLLocationManager *)manager didEnterRegion:(CLRegion *)region
 {
-    NSLog(@"enter region");
     [self sendLocalNotificationForMessage:@"Enter Region"];
     
     if ([region isMemberOfClass:[CLBeaconRegion class]] && [CLLocationManager isRangingAvailable]) {
@@ -105,25 +103,20 @@
         }];
         
         for (CLBeacon *beacon in sortedBeacons){
-            NSLog(@"%d 個めのbeacon", counter);
             counter++;
             NSString *rangeMessage;
             
             switch (beacon.proximity) {
                 case CLProximityImmediate:
-                    NSLog(@"immediate");
                     rangeMessage = @"immediate";
                     break;
                 case CLProximityNear:
-                    NSLog(@"near");
                     rangeMessage = @"near";
                     break;
                 case CLProximityFar:
-                    NSLog(@"far");
                     rangeMessage = @"far";
                     break;
                 default:
-                    NSLog(@"unknown");
                     rangeMessage = @"unknown";
                     break;
             }
@@ -139,7 +132,6 @@
             displayMessage = [displayMessage stringByAppendingString: message];
         }
 
-        NSLog(@"%@", displayMessage);
 //        [delegate display: displayMessage];
     }
 }
@@ -155,7 +147,7 @@
 
 - (void)sendPostMessage: (CLBeacon*)beacon proximity: (NSString*)proximity{
     NSString *uuid = [[beacon.proximityUUID UUIDString] stringByReplacingOccurrencesOfString: @"-" withString: @""];
-    NSString *query = [NSString stringWithFormat:@"uuid=%@&major=%d&minor=%d&rssi=%ld&accuracy=%f&proximity=%@&id=phonegap-iPhone",
+    NSString *query = [NSString stringWithFormat:@"uuid=%@&major=%d&minor=%d&rssi=%ld&accuracy=%f&proximity=%@&id=nakakura",
                        uuid, [beacon.major intValue], [beacon.minor intValue], beacon.rssi, beacon.accuracy, proximity];
     NSData *queryData = [query dataUsingEncoding:NSUTF8StringEncoding];
     
@@ -165,12 +157,15 @@
     [request setHTTPMethod:@"POST"];
     [request setHTTPBody:queryData];
     
-    NSURLResponse *response;
-    NSError *error;
-    
-    [NSURLConnection sendSynchronousRequest:request
-                          returningResponse:&response
-                                      error:&error];
+    [NSURLConnection sendAsynchronousRequest:request queue:[NSOperationQueue mainQueue]
+                           completionHandler:^(NSURLResponse *response, NSData *data, NSError *error) {
+                               if (error) {
+                                   NSLog(@"error: %@", [error localizedDescription]);
+                                   return;
+                               } else {
+                                   // succeeded
+                               }
+                           }];
 }
 
 @end

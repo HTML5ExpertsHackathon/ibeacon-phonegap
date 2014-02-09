@@ -7,7 +7,7 @@
 - (void) launch:(CDVInvokedUrlCommand*)command {
     NSLog(@"Hello, this is a native function called from PhoneGap/Cordova!");
     beaconManager = [[IBeaconManager alloc]
-                     init: @"00000000-8E5B-1001-B000-001C4DB3DB2C"
+                     init: @"B9407F30-F5F8-466E-AFF9-25556B57FE6D"
                      Identifier: @"com.ntt.webcore"];
     beaconManager.delegate = self;
 }
